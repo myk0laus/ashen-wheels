@@ -1,0 +1,1088 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ashen Wheels · Попелясті Колеса</title>
+<meta name="description" content="Попелясті Колеса (Ashen Wheels): покрокова фентезі-стратегія про екіпаж, бойову машину й запечатану магію.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze:wght@600;700&family=Philosopher:wght@700&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: a presentation of the game, no changelog. The square at night (hero) → the journey as hex steps →
+   four realms → the valleys and the range ruler → Skirmish → a felt dice tray → seals → the tutorial. One committed dark look. */
+:root {
+  --night: #0c1222;
+  --twilight: #172340;
+  --plate: #1c2b4d;
+  --line: #35466e;
+  --gold: #d9a94e;
+  --gold-hi: #f3d898;
+  --ink: #2a1904;
+  --text: #e6e0d5;
+  --muted: #a9b2c6;
+  --powder: #ee9a45;
+  --growth: #7cc76b;
+  --dust: #b690ee;
+  --sun: #efcd5c;
+  --felt: #16403c;
+  --felt-well: #0e2d2b;
+  --wood: #54331c;
+  --good: #8bdc7c;
+  --bad: #f58b72;
+  --veil: rgba(12, 18, 34, .82);
+
+  --display: "Grenze", "Philosopher", "Palatino Linotype", Georgia, serif;
+  --body: "PT Serif", Georgia, "Times New Roman", serif;
+
+  --small: .875rem;
+  --base: 1.0625rem;
+  --h3: 1.4rem;
+  --h2: clamp(2rem, 4.5vw, 3.1rem);
+  --h1: clamp(3rem, 8.4vw, 6.4rem);
+
+  --width: 1200px;
+  --space: clamp(56px, 8vw, 108px);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--night); scroll-behavior: smooth; scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 66px); }
+html.viewer-open { overflow: hidden; }
+body { margin: 0; background: var(--night); color: var(--text); font: var(--base)/1.6 var(--body); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--night); }
+[hidden] { display: none !important; }
+img { display: block; max-width: 100%; height: auto; }
+figure { margin: 0; min-width: 0; }
+h1, h2, h3, h4 { margin: 0; font-family: var(--display); line-height: 1.14; text-wrap: balance; font-variant-numeric: lining-nums; }
+p { margin: 0; }
+ul, ol { margin: 0; padding: 0; }
+a { color: var(--gold-hi); }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3px; }
+
+.wrap {
+  width: 100%;
+  max-width: var(--width);
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.section { padding-block: var(--space); }
+.head { display: grid; gap: 14px; max-width: 760px; margin-bottom: clamp(26px, 4vw, 46px); }
+.head h2 { font-size: var(--h2); color: var(--gold-hi); }
+.head p, .muted { color: var(--muted); }
+
+/* top bar */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: var(--night); border-bottom: 1px solid var(--line); }
+.bar .wrap { display: flex; align-items: center; gap: 20px; min-height: 58px; }
+.mark { font: 700 1.2rem/1 var(--display); color: var(--gold-hi); text-decoration: none; white-space: nowrap; }
+.nav { display: flex; gap: 18px; margin-left: auto; }
+.nav a { font: 700 1rem/1 var(--display); color: var(--muted); text-decoration: none; white-space: nowrap; padding-block: 8px; }
+.nav a:hover { color: var(--gold-hi); }
+.lang { display: flex; flex: none; border: 1px solid var(--line); }
+.lang button { min-width: 48px; min-height: 36px; border: 0; background: transparent; color: var(--muted); font: 700 .85rem/1 var(--display); letter-spacing: .06em; }
+.lang button[aria-pressed="true"] { background: var(--gold); color: var(--ink); }
+
+/* pointed plates, as the buttons in the game */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 10px 28px; border: 0;
+  font: 700 1.05rem/1.1 var(--display); letter-spacing: .03em; text-decoration: none;
+  background: linear-gradient(var(--gold-hi), var(--gold)); color: var(--ink);
+  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0 50%);
+}
+.btn.quiet { background: var(--plate); color: var(--gold-hi); }
+.btn:hover { filter: brightness(1.12); }
+.btn:focus-visible { outline: none; filter: brightness(1.3); text-decoration: underline; }
+.btn:disabled { opacity: .55; cursor: default; }
+
+/* every picture opens the viewer */
+.zoom { display: block; position: relative; overflow: hidden; background: var(--twilight); cursor: zoom-in; color: inherit; }
+.zoom img { width: 100%; }
+.zoom::after {
+  content: ""; position: absolute; right: 6px; top: 6px; width: 28px; height: 28px; pointer-events: none;
+  background: var(--veil) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%23f3d898' stroke-width='1.8'%3E%3Cpath d='M1 6V1h5M12 1h5v5M17 12v5h-5M6 17H1v-5'/%3E%3C/svg%3E") center / 16px no-repeat;
+  opacity: .8; transition: opacity .15s;
+}
+.zoom:hover::after { opacity: 1; }
+.frame { box-shadow: 0 0 0 1px var(--line); }
+.frame img { aspect-ratio: 16 / 9; object-fit: cover; }
+.frame:hover { box-shadow: 0 0 0 2px var(--gold); }
+
+/* hero */
+.hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+.hero .backdrop { position: absolute; inset: 0; }
+.hero .backdrop img { height: 100%; object-fit: cover; object-position: 60% 58%; }
+.hero .backdrop::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, rgba(12, 18, 34, .96) 0, rgba(12, 18, 34, .78) 34%, rgba(12, 18, 34, 0) 64%);
+}
+.hero .wrap { position: relative; pointer-events: none; min-height: clamp(480px, 50vw, 720px); display: grid; align-items: center; padding-block: 64px; }
+.hero-text { pointer-events: auto; max-width: 540px; display: grid; gap: 20px; }
+.hero h1 { font-size: var(--h1); font-weight: 700; line-height: .98; color: var(--gold-hi); }
+.hero h1 span { display: block; }
+.tagline { font: 700 var(--h3)/1.25 var(--display); }
+.hint { color: var(--gold); font-size: var(--small); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* a large picture beside its text */
+.feature { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 30px; align-items: center; margin-bottom: 44px; }
+.feature-text { display: grid; gap: 12px; min-width: 0; }
+.feature-text h3 { font-size: 2rem; color: var(--gold-hi); }
+.feature-text p { color: var(--muted); }
+
+/* journey */
+.road { list-style: none; counter-reset: step; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px 24px; }
+.road li { counter-increment: step; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.road h3 { display: flex; align-items: center; gap: 12px; font-size: var(--h3); }
+.road h3::before {
+  content: counter(step); flex: none; width: 34px; height: 38px; display: grid; place-items: center; font-size: 1.05rem;
+  background: var(--gold); color: var(--ink); clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+}
+.road p { color: var(--muted); font-size: 1rem; }
+
+/* realms */
+.schools { background: var(--twilight); }
+.realms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px 36px; }
+.realm { --school: var(--gold); min-width: 0; }
+[data-school="powder"] { --school: var(--powder); }
+[data-school="growth"] { --school: var(--growth); }
+[data-school="dust"] { --school: var(--dust); }
+[data-school="sun"] { --school: var(--sun); }
+.realm h3 { font-size: 1.75rem; color: var(--school); margin-top: 18px; }
+.realm .motto { color: var(--muted); margin-top: 4px; }
+.kit { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 14px 0; padding-block: 10px; border-block: 1px solid var(--line); }
+.kit div { display: grid; }
+.kit dt { color: var(--muted); font-size: var(--small); }
+.kit dd { margin: 0; font: 700 1.1rem/1.3 var(--display); }
+.heroes { list-style: none; display: grid; gap: 10px; font-size: .97rem; line-height: 1.4; }
+.heroes li { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1fr); gap: 12px; }
+.heroes b, .heroes small { display: block; }
+.heroes small { color: var(--muted); font-size: var(--small); }
+.heroes em { display: block; font-style: normal; color: var(--school); }
+
+/* battle */
+.valleys { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 16px; }
+.valleys figcaption { padding-top: 8px; font: 700 1.1rem/1.3 var(--display); }
+.battle-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 32px; margin-top: 48px; }
+.battle-facts h3 { font-size: var(--h3); color: var(--gold-hi); margin-bottom: 8px; }
+.battle-facts p { color: var(--muted); font-size: 1rem; }
+.ruler { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--line); }
+.ruler-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 24px; margin-bottom: 18px; }
+.ruler-top h3 { font-size: var(--h3); color: var(--gold-hi); }
+.distance { display: flex; align-items: center; gap: 12px; color: var(--muted); min-width: 0; max-width: 100%; }
+.distance input { width: min(240px, 42vw); min-width: 0; flex-shrink: 1; accent-color: var(--gold); }
+.distance output { min-width: 4ch; font: 700 1.4rem/1 var(--display); color: var(--gold-hi); font-variant-numeric: lining-nums tabular-nums; }
+.weapon { display: grid; grid-template-columns: 180px minmax(0, 1fr) 100px; gap: 4px 14px; align-items: center; padding-block: 7px; }
+.track { position: relative; height: 18px; background: var(--twilight); }
+.track i, .track b { position: absolute; top: 0; bottom: 0; }
+.track i { background: var(--line); }
+.weapon.can .track i { background: var(--gold); }
+.track b { width: 3px; margin-left: -1.5px; background: var(--text); top: -3px; bottom: -3px; }
+.weapon .state { color: var(--muted); font-size: var(--small); }
+.weapon.can .state { color: var(--good); }
+
+/* skirmish */
+.skirmish { background: var(--twilight); }
+.skirmish .wide { margin-bottom: 30px; }
+.skirmish .wide img { aspect-ratio: 20 / 9; object-fit: cover; }
+.calls { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px 24px; }
+.calls li { display: grid; align-content: start; gap: 4px; min-width: 0; }
+.calls b { font: 700 1.25rem/1.2 var(--display); color: var(--school); }
+.calls span { color: var(--muted); font-size: .97rem; line-height: 1.45; }
+.skirmish h3 { font-size: 1.2rem; color: var(--gold); margin-bottom: 14px; }
+
+/* dice */
+.tray { padding: clamp(18px, 3vw, 32px); background: var(--felt); border: clamp(7px, 1.2vw, 14px) solid var(--wood); }
+.tray-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 24px; margin-bottom: 22px; }
+.tray-top p { max-width: 58ch; font-size: .98rem; }
+.difficulty { display: flex; align-items: center; gap: 10px; }
+.difficulty button { width: 40px; height: 40px; border: 1px solid var(--gold); background: transparent; color: var(--gold-hi); font-size: 1.2rem; }
+.difficulty output { min-width: 2ch; text-align: center; font: 700 1.7rem/1 var(--display); color: var(--gold-hi); font-variant-numeric: lining-nums; }
+.dice { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.die { display: grid; grid-template-rows: auto auto minmax(4.6em, auto) auto minmax(4.6em, auto) auto; gap: 10px; padding: 16px; background: var(--felt-well); min-width: 0; }
+.die h3 { display: flex; justify-content: space-between; gap: 8px; font-size: 1.2rem; color: var(--school); }
+.face {
+  width: 108px; height: 108px; justify-self: center; display: grid; place-items: center; background: var(--school); color: var(--ink);
+  font: 700 2.8rem/1 var(--display); font-variant-numeric: lining-nums;
+}
+.d6 { border-radius: 14px; width: 96px; height: 96px; margin-block: 6px; }
+.d8 { clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.d10 { clip-path: polygon(50% 0, 100% 40%, 92% 66%, 50% 100%, 8% 66%, 0 40%); }
+.d12 { clip-path: polygon(50% 0, 80% 9%, 98% 35%, 98% 65%, 80% 91%, 50% 100%, 20% 91%, 2% 65%, 2% 35%, 20% 9%); }
+.face.rolling { animation: wobble .16s linear infinite; }
+@keyframes wobble { 25% { transform: rotate(-9deg); } 75% { transform: rotate(9deg); } }
+.trick, .odds, .verdict { font-size: .9rem; line-height: 1.4; }
+.trick b { display: block; color: var(--school); }
+.odds { color: var(--muted); font-variant-numeric: tabular-nums; }
+.verdict strong { display: block; font: 700 1.2rem/1.3 var(--display); }
+.verdict .good { color: var(--good); }
+.verdict .bad { color: var(--bad); }
+.tray-foot { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+
+/* seals */
+.seals { background: var(--twilight); }
+.seal-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; max-width: 840px; }
+.seal-row figure { display: grid; gap: 10px; align-content: start; }
+.seal-row figcaption b { display: block; font: 700 var(--h3)/1.3 var(--display); color: var(--gold-hi); }
+.seal-row figcaption span { display: block; color: var(--muted); font-size: .97rem; line-height: 1.4; }
+
+/* tutorial and status */
+.demo { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 34px; align-items: center; }
+.demo-text { display: grid; gap: 14px; min-width: 0; }
+.stops { padding-left: 22px; }
+.stops li::marker { color: var(--gold); font-weight: 700; }
+.status { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px 28px; margin: 44px 0 0; padding-top: 26px; border-top: 1px solid var(--line); }
+.status dt { font: 700 1.15rem/1.3 var(--display); color: var(--gold); margin-bottom: 6px; }
+.status dd { margin: 0; color: var(--muted); font-size: .97rem; }
+
+footer { border-top: 1px solid var(--line); }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; padding-block: 26px; color: var(--muted); font-size: var(--small); }
+
+/* picture viewer */
+.viewer {
+  position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+  background: var(--night); color: var(--text); overflow: hidden;
+}
+.viewer[open] { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr); }
+.viewer::backdrop { background: var(--night); }
+.viewer-tools, .viewer-foot {
+  display: flex; align-items: center; gap: 6px; background: var(--twilight);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.viewer-tools { padding-top: calc(env(safe-area-inset-top, 0px) + 6px); padding-bottom: 6px; }
+.viewer-tools .count { margin-right: auto; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.viewer button { min-width: 44px; height: 44px; padding: 0 8px; border: 1px solid var(--line); background: var(--night); color: var(--gold-hi); font-size: 1.25rem; }
+.viewer button:hover { border-color: var(--gold); }
+.viewer .percent { font-size: var(--small); min-width: 58px; }
+.viewer-body { position: relative; min-height: 0; }
+.stage { position: absolute; inset: 0; overflow: hidden; touch-action: none; cursor: zoom-in; user-select: none; }
+.stage.zoomed { cursor: grab; }
+.stage.dragging { cursor: grabbing; }
+.stage img { position: absolute; left: 0; top: 0; max-width: none; transform-origin: 0 0; pointer-events: none; -webkit-user-drag: none; }
+.stage img.loading { visibility: hidden; }
+.viewer-note { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: var(--muted); pointer-events: none; }
+.viewer .step { position: absolute; top: 50%; transform: translateY(-50%); height: 56px; opacity: .85; }
+.viewer .prev { left: max(8px, env(safe-area-inset-left, 0px)); }
+.viewer .next { right: max(8px, env(safe-area-inset-right, 0px)); }
+.viewer-foot { flex-wrap: wrap; justify-content: space-between; gap: 2px 20px; padding-top: 10px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px); line-height: 1.35; }
+.viewer-foot small { color: var(--muted); font-size: .8rem; }
+
+@media (max-width: 1040px) {
+  .nav { display: none; }
+  .lang { margin-left: auto; }
+  .dice, .calls, .status { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 860px) {
+  .feature, .demo, .realms { grid-template-columns: minmax(0, 1fr); }
+  .road, .valleys { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .battle-facts { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 680px) {
+  .hero .backdrop { position: relative; inset: auto; }
+  .hero .backdrop img { height: auto; aspect-ratio: 4 / 3; object-position: 70% 60%; }
+  .hero .backdrop::before { background: linear-gradient(0deg, var(--night), transparent 28%); }
+  .hero .wrap { min-height: 0; padding-block: 6px 36px; }
+  .road, .valleys { grid-template-columns: minmax(0, 1fr); }
+  .weapon { grid-template-columns: minmax(0, 1fr) auto; }
+  .weapon .track { grid-column: 1 / -1; grid-row: 2; }
+  .seal-row { gap: 10px; }
+  .seal-row figcaption b { font-size: 1.05rem; }
+  .seal-row figcaption span { font-size: .8rem; }
+  .seal-row .zoom::after { width: 24px; height: 24px; right: 3px; top: 3px; }
+  .viewer .step { display: none; }
+  .viewer-foot small { display: none; }
+}
+@media (max-width: 500px) {
+  .dice, .calls, .status { grid-template-columns: minmax(0, 1fr); }
+  .die { grid-template-rows: none; }
+  .actions .btn { flex: 1 1 auto; }
+  .mark { font-size: 1.05rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .face.rolling { animation: none; }
+}
+</style>
+<link rel="canonical" href="https://myk0laus.github.io/ashen-wheels/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ashen Wheels · Попелясті Колеса">
+<meta property="og:description" content="Покрокова експедиція інженерів, героїв і запечатаної магії">
+<meta property="og:url" content="https://myk0laus.github.io/ashen-wheels/">
+<meta property="og:image" content="https://myk0laus.github.io/ashen-wheels/img/hero.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23d9a94e' d='M16 1l13 7.5v15L16 31 3 23.5v-15z'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%230c1222'/%3E%3C/svg%3E">
+<style>:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="mark" href="#top" data-en="Ashen Wheels">Попелясті Колеса</a>
+    <nav class="nav" aria-label="Розділи">
+      <a href="#journey" data-en="Journey">Похід</a>
+      <a href="#schools" data-en="Factions">Фракції</a>
+      <a href="#battle" data-en="Machine battle">Бій машин</a>
+      <a href="#skirmish" data-en="Skirmish">Сутичка</a>
+      <a href="#dice" data-en="Dice">Кості долі</a>
+      <a href="#seals" data-en="Seals">Печаті</a>
+      <a href="#demo" data-en="Tutorial">Навчання</a>
+    </nav>
+    <div class="lang" role="group" aria-label="Мова / Language">
+      <button type="button" id="lang-uk" data-lang="uk" aria-pressed="true">УКР</button>
+      <button type="button" id="lang-en" data-lang="en" aria-pressed="false">ENG</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero">
+  <a class="zoom backdrop" id="hero-picture" href="img/full/hero.jpg" data-cap="Головне меню без інтерфейсу: нічна площа й герої трьох фракцій" data-cap-en="The main menu without its interface: the square at night and heroes of three factions">
+    <img src="img/hero.jpg" alt="" width="1920" height="1080">
+  </a>
+  <div class="wrap">
+    <div class="hero-text">
+      <h1 data-en="<span>Ashen</span><span>Wheels</span>"><span>Попелясті</span><span>Колеса</span></h1>
+      <p class="tagline" data-en="A turn-based expedition of engineers, heroes and sealed magic">Покрокова експедиція інженерів, героїв і запечатаної магії</p>
+      <p data-en="Gather three heroes, build a war machine from modules and drive it through the fog of the Ashen Lands. Where the road is closed, fight machine against machine or go on foot with a hand of cards.">Зберіть трьох героїв, збудуйте з модулів бойову машину й ведіть її крізь туман Попелястих земель. Де дорогу перекрито, бийтеся машина на машину або йдіть пішки з картами в руці.</p>
+      <div class="actions">
+        <a class="btn" href="#journey" data-en="Discover the game">Про гру</a>
+        <button class="btn quiet" type="button" id="hero-open" data-en="View the scene">Роздивитись сцену</button>
+      </div>
+      <p class="hint" data-en="Click any picture to take a closer look.">Натисніть будь-яку картинку, щоб роздивитись її.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="journey">
+  <div class="wrap">
+    <div class="head">
+      <h2 data-en="From the camp to battle and back with the spoils">Від табору до бою й назад із трофеями</h2>
+    </div>
+    <ol class="road">
+      <li>
+        <a class="zoom frame" href="img/full/road-crew.jpg" data-cap="Вибір екіпажу: троє гномів і Школа Пороху командира" data-cap-en="Crew selection: three dwarves and the commander's School of Powder"><img src="img/road-crew.jpg" alt="" loading="lazy" width="1100" height="619"></a>
+        <h3 data-en="Gather a crew">Зберіть екіпаж</h3>
+        <p data-en="Pick three of twelve heroes and name a commander. Their school sets the machine's heart, its weapon and the starting supplies.">Оберіть трьох із дванадцяти героїв і призначте командира. Його школа задає серце машини, зброю й стартові припаси.</p>
+      </li>
+      <li>
+        <a class="zoom frame" href="img/full/road-camp.jpg" data-cap="Табір експедиції: машина, екіпаж і спорядження" data-cap-en="The expedition camp: the machine, the crew and their gear"><img src="img/road-camp.jpg" alt="" loading="lazy" width="1100" height="619"></a>
+        <h3 data-en="Get ready in camp">Спорядіться в таборі</h3>
+        <p data-en="Put on gear, buy supplies, sort seals and decks. Item stats count in both kinds of battle and on the dice.">Вдягніть спорядження, купіть припаси, перегляньте печаті й колоди. Стати речей діють в обох видах бою й на кубиках.</p>
+      </li>
+      <li>
+        <a class="zoom frame" href="img/full/road-workshop.jpg" data-cap="Майстерня: збирання машини з деталей" data-cap-en="The workshop: building the machine from parts"><img src="img/road-workshop.jpg" alt="" loading="lazy" width="1100" height="619"></a>
+        <h3 data-en="Build the machine">Збудуйте машину</h3>
+        <p data-en="A heart, wheels, weapons, armor, a roof and crew posts. Each module has weight and strength, and the enemy aims at modules.">Серце, колеса, зброя, броня, дах і пости екіпажу. У кожного модуля є вага й міцність, і ворог цілить саме в модулі.</p>
+      </li>
+      <li>
+        <a class="zoom frame" href="img/full/road-map.jpg" data-cap="Машина екіпажу на гексовій мапі біля табору" data-cap-en="The crew's machine on the hex map by the camp"><img src="img/road-map.jpg" alt="" loading="lazy" width="1100" height="619"></a>
+        <h3 data-en="Drive into the fog">Рушайте в туман</h3>
+        <p data-en="The campaign map has 25 points, from shrines and traders to ambushes. Choose a Careful, March or Overdrive pace and pay for it in scrap and risk.">На мапі кампанії 25 точок, від святинь і торговців до засідок. Оберіть темп «Обережно», «Марш» чи «Форсаж» і платіть брухтом та ризиком.</p>
+      </li>
+      <li>
+        <a class="zoom frame" href="img/full/road-dice.jpg" data-cap="Пошук у таборі: дзвенить кубик Школи Праху" data-cap-en="Searching at camp: the die of the School of Ash rings"><img src="img/road-dice.jpg" alt="" loading="lazy" width="1100" height="619"></a>
+        <h3 data-en="Take the risk">Ризикніть</h3>
+        <p data-en="A trap, a swamp or a search is settled by a hero's die. The chance and every bonus are shown before you throw.">Пастку, болото чи пошук вирішує кубик героя. Шанс і всі бонуси видно ще до кидка.</p>
+      </li>
+      <li>
+        <a class="zoom frame" href="img/full/road-battle.jpg" data-cap="Бій машин: ворожий снаряд перелетів" data-cap-en="Machine battle: the enemy's shot flies over"><img src="img/road-battle.jpg" alt="" loading="lazy" width="1100" height="619"></a>
+        <h3 data-en="Win and return">Переможіть і поверніться</h3>
+        <p data-en="An enemy machine means a machine battle, a band on foot means a Skirmish. Victories bring scrap, ammunition, cards and seals.">З ворожою машиною буде бій машин, із пішим загоном «Сутичка». Перемоги приносять брухт, набої, карти й печаті.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="section schools" id="schools">
+  <div class="wrap">
+    <div class="head">
+      <h2 data-en="Four factions, twelve heroes">Чотири фракції, дванадцять героїв</h2>
+      <p data-en="Each hero has three battle skills. One of them is a control trick, named here next to the hero. Mixed crews are allowed and useful.">У кожного героя три бойові вміння. Одне з них — прийом контролю, його названо поруч із героєм. Змішаний екіпаж дозволено, і він корисний.</p>
+    </div>
+    <div class="realms">
+      <article class="realm" data-school="powder">
+        <a class="zoom frame" href="img/full/realm-powder.jpg" data-cap="Гноми Порохівники, ілюстрація фракції" data-cap-en="Powder Dwarves, faction illustration"><img src="img/realm-powder.jpg" alt="" loading="lazy" width="1100" height="619"></a>
+        <h3 data-en="Powder Dwarves">Гноми Порохівники</h3>
+        <p class="motto" data-en="School of Powder. Artillery, armor and repair, with no magic at all.">Школа Пороху. Артилерія, броня й ремонт без жодної магії.</p>
+        <dl class="kit">
+          <div><dt data-en="Heart">Серце</dt><dd data-en="Steam boiler">Паровий котел</dd></div>
+          <div><dt data-en="Weapon">Зброя</dt><dd data-en="Cannon">Гармата</dd></div>
+          <div><dt data-en="Die">Кубик</dt><dd>d6</dd></div>
+        </dl>
+        <ul class="heroes">
+          <li><span data-en="<b>Borin Powderfist</b><small>Gunner</small>"><b>Борін Пороховий Кулак</b><small>Гарматник</small></span><span data-en="<em>Grapeshot on deck</em><small>a hero does not act for 1 round</small>"><em>Картеч по палубі</em><small>герой не діє 1 раунд</small></span></li>
+          <li><span data-en="<b>Hilda Flint</b><small>Sapper</small>"><b>Гільда Кремінь</b><small>Сапер</small></span><span data-en="<em>Mount blast</em><small>a weapon is silent for 2 rounds</small>"><em>Підрив лафета</em><small>зброя мовчить 2 раунди</small></span></li>
+          <li><span data-en="<b>Thorgrim Wrench</b><small>Mechanic</small>"><b>Торгрім Ключ</b><small>Механік</small></span><span data-en="<em>Strip the thread</em><small>no repair for 3 rounds</small>"><em>Зірвати різьбу</em><small>без ремонту 3 раунди</small></span></li>
+        </ul>
+      </article>
+
+      <article class="realm" data-school="growth">
+        <a class="zoom frame" href="img/full/realm-growth.jpg" data-cap="Тернова Корона, ілюстрація фракції" data-cap-en="Thorn Crown, faction illustration"><img src="img/realm-growth.jpg" alt="" loading="lazy" width="1100" height="619"></a>
+        <h3 data-en="Thorn Crown">Тернова Корона</h3>
+        <p class="motto" data-en="School of Growth. Regeneration, spores and cocoon armor.">Школа Росту. Регенерація, спори й броня-кокони.</p>
+        <dl class="kit">
+          <div><dt data-en="Heart">Серце</dt><dd data-en="Living heartwood">Жива серцевина</dd></div>
+          <div><dt data-en="Weapon">Зброя</dt><dd data-en="Ballista">Баліста</dd></div>
+          <div><dt data-en="Die">Кубик</dt><dd>d10</dd></div>
+        </dl>
+        <ul class="heroes">
+          <li><span data-en="<b>Liana Moss</b><small>Druid</small>"><b>Ліана Мохова</b><small>Друїд</small></span><span data-en="<em>Sleep spores</em><small>a hero does not act for 1 round</small>"><em>Сонні спори</em><small>герой не діє 1 раунд</small></span></li>
+          <li><span data-en="<b>Voren Thornbearer</b><small>Thorn Guard</small>"><b>Ворен Шипоносець</b><small>Терновий Страж</small></span><span data-en="<em>Thorn bonds</em><small>a weapon is silent for 2 rounds</small>"><em>Тернові пута</em><small>зброя мовчить 2 раунди</small></span></li>
+          <li><span data-en="<b>Elira Quietarrow</b><small>Hunter</small>"><b>Еліра Тиха Стріла</b><small>Мисливець</small></span><span data-en="<em>Poison arrow</em><small>no repair for 3 rounds</small>"><em>Отруйна стріла</em><small>без ремонту 3 раунди</small></span></li>
+        </ul>
+      </article>
+
+      <article class="realm" data-school="dust">
+        <a class="zoom frame" href="img/full/realm-dust.jpg" data-cap="Некрополіс Попелястих Дзвонів, ілюстрація фракції" data-cap-en="Necropolis of the Ashen Bells, faction illustration"><img src="img/realm-dust.jpg" alt="" loading="lazy" width="1100" height="619"></a>
+        <h3 data-en="Necropolis of the Ashen Bells">Некрополіс Попелястих Дзвонів</h3>
+        <p class="motto" data-en="School of Ash. Curses, raised wreckage and sacrifices.">Школа Праху. Прокляття, оживлені уламки й жертви.</p>
+        <dl class="kit">
+          <div><dt data-en="Heart">Серце</dt><dd data-en="Burial sarcophagus">Поховальний саркофаг</dd></div>
+          <div><dt data-en="Weapon">Зброя</dt><dd data-en="Catapult">Катапульта</dd></div>
+          <div><dt data-en="Die">Кубик</dt><dd>d12</dd></div>
+        </dl>
+        <ul class="heroes">
+          <li><span data-en="<b>Morten the Ashen</b><small>Necromancer</small>"><b>Мортен Попелястий</b><small>Некромант</small></span><span data-en="<em>Numbing curse</em><small>a hero does not act for 2 rounds</small>"><em>Прокляття заціпеніння</em><small>герой не діє 2 раунди</small></span></li>
+          <li><span data-en="<b>Seva Bonewright</b><small>Bone Architect</small>"><b>Сева Кістобуд</b><small>Кістяний Архітектор</small></span><span data-en="<em>Bone shackles</em><small>a weapon is silent for 2 rounds</small>"><em>Кістяні кайдани</em><small>зброя мовчить 2 раунди</small></span></li>
+          <li><span data-en="<b>Kain the Reaper</b><small>Reaper</small>"><b>Каїн Жнець</b><small>Жнець</small></span><span data-en="<em>Blight</em><small>no repair for 3 rounds</small>"><em>Тлін</em><small>без ремонту 3 раунди</small></span></li>
+        </ul>
+      </article>
+
+      <article class="realm" data-school="sun">
+        <a class="zoom frame" href="img/full/realm-sun.jpg" data-cap="Імперія Скляних Дюн, ілюстрація фракції" data-cap-en="Empire of the Glass Dunes, faction illustration"><img src="img/realm-sun.jpg" alt="" loading="lazy" width="1100" height="619"></a>
+        <h3 data-en="Empire of the Glass Dunes">Імперія Скляних Дюн</h3>
+        <p class="motto" data-en="School of the Sun. Sand wards, runes, tricks and mobility.">Школа Сонця. Піщані захисти, руни, хитрощі й рухливість.</p>
+        <dl class="kit">
+          <div><dt data-en="Heart">Серце</dt><dd data-en="Sun furnace">Сонячний горн</dd></div>
+          <div><dt data-en="Weapon">Зброя</dt><dd data-en="Mortar">Мортира</dd></div>
+          <div><dt data-en="Die">Кубик</dt><dd>d8</dd></div>
+        </dl>
+        <ul class="heroes">
+          <li><span data-en="<b>Ash-Sharif</b><small>Sand Lord</small>"><b>Аш-Шаріф</b><small>Повелитель Пісків</small></span><span data-en="<em>Mirage</em><small>a hero does not act for 1 round</small>"><em>Міраж</em><small>герой не діє 1 раунд</small></span></li>
+          <li><span data-en="<b>Zaira of the Dunes</b><small>Dune Engineer</small>"><b>Заїра з Барханів</b><small>Інженер Барханів</small></span><span data-en="<em>Sand in the gears</em><small>a weapon is silent for 3 rounds</small>"><em>Пісок у механізмі</em><small>зброя мовчить 3 раунди</small></span></li>
+          <li><span data-en="<b>Tamir the Keeper</b><small>Relic Keeper</small>"><b>Тамір Хранитель</b><small>Хранитель Реліквій</small></span><span data-en="<em>Seal of decay</em><small>no repair for 3 rounds</small>"><em>Печать занепаду</em><small>без ремонту 3 раунди</small></span></li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="battle">
+  <div class="wrap">
+    <div class="head">
+      <h2 data-en="Machine against machine in six valleys">Машина на машину в шести долинах</h2>
+      <p data-en="You give orders to the crew, then the enemy acts. Its intents and chances to hit are on screen before you decide.">Ви віддаєте накази екіпажу, потім діє ворог. Його наміри й шанси влучити видно ще до вашого рішення.</p>
+    </div>
+    <article class="feature">
+      <a class="zoom frame" href="img/full/battle-aim.jpg" data-cap="Наведення гармати в бою машин" data-cap-en="Aiming the cannon in a machine battle"><img src="img/battle-aim.jpg" alt="" loading="lazy" width="1600" height="900"></a>
+      <div class="feature-text">
+        <h3 data-en="You lay every shot yourself">Кожен постріл наводите самі</h3>
+        <p data-en="Pick an enemy module, set the angle and the power, and follow the dotted path. Look around the battlefield freely before you fire.">Оберіть ворожий модуль, задайте кут і силу, стежте за пунктиром траєкторії. Перед пострілом вільно оглядайте поле бою.</p>
+      </div>
+    </article>
+    <div class="valleys">
+      <figure>
+        <a class="zoom frame" href="img/full/valley-plains.jpg" data-cap="Бій машин на рівнині" data-cap-en="Machine battle on the plains"><img src="img/valley-plains.jpg" alt="" loading="lazy" width="900" height="506"></a>
+        <figcaption data-en="Plowed plains">Рівнина з ріллею</figcaption>
+      </figure>
+      <figure>
+        <a class="zoom frame" href="img/full/valley-forest.jpg" data-cap="Бій машин у лісі" data-cap-en="Machine battle in the forest"><img src="img/valley-forest.jpg" alt="" loading="lazy" width="900" height="506"></a>
+        <figcaption data-en="Forest of giants">Ліс велетнів</figcaption>
+      </figure>
+      <figure>
+        <a class="zoom frame" href="img/full/valley-rocks.jpg" data-cap="Бій машин серед скель" data-cap-en="Machine battle among the crags"><img src="img/valley-rocks.jpg" alt="" loading="lazy" width="900" height="506"></a>
+        <figcaption data-en="Crags and arches">Скелі й арки</figcaption>
+      </figure>
+      <figure>
+        <a class="zoom frame" href="img/full/valley-ridge.jpg" data-cap="Бій машин під гірським кряжем" data-cap-en="Machine battle below the mountain ridge"><img src="img/valley-ridge.jpg" alt="" loading="lazy" width="900" height="506"></a>
+        <figcaption data-en="Snowy ridge">Засніжений кряж</figcaption>
+      </figure>
+      <figure>
+        <a class="zoom frame" href="img/full/valley-swamp.jpg" data-cap="Бій машин у болоті" data-cap-en="Machine battle in the swamp"><img src="img/valley-swamp.jpg" alt="" loading="lazy" width="900" height="506"></a>
+        <figcaption data-en="Swamp in the mist">Болото в тумані</figcaption>
+      </figure>
+      <figure>
+        <a class="zoom frame" href="img/full/valley-water.jpg" data-cap="Бій машин на березі озера" data-cap-en="Machine battle on the lake shore"><img src="img/valley-water.jpg" alt="" loading="lazy" width="900" height="506"></a>
+        <figcaption data-en="Lake shore">Берег озера</figcaption>
+      </figure>
+    </div>
+
+    <div class="battle-facts">
+      <div>
+        <h3 data-en="Every shot has weight">Постріл має вагу</h3>
+        <p data-en="A ball bounces and rolls, a bolt sticks, a stone splits, a bomb explodes. The machine rocks from the recoil.">Ядро відскакує й котиться, болт застрягає, камінь розколюється, бомба вибухає. Машина здригається від віддачі.</p>
+      </div>
+      <div>
+        <h3 data-en="Cover breaks">Укриття ламаються</h3>
+        <p data-en="Walls, boulders and wagons hide modules from direct fire until shots smash them. Lobbing weapons fire over them.">Мури, валуни й вози ховають модулі від прямого вогню, доки їх не розіб’ють. Навісна зброя стріляє поверх них.</p>
+      </div>
+      <div>
+        <h3 data-en="Enemies have character">Ворог має характер</h3>
+        <p data-en="A Raider charges in, an Artillerist keeps away, a Defender repairs, a Hunter goes for wheels and guns.">Рейдер жене впритул, Артилерист тримає дистанцію, Захисник лагодиться, Мисливець цілить у колеса й зброю.</p>
+      </div>
+    </div>
+
+    <div class="ruler">
+      <div class="ruler-top">
+        <h3 data-en="Who can fire from here?">Хто дістане звідси?</h3>
+        <div class="distance">
+          <label for="range" data-en="Distance">Дистанція</label>
+          <input id="range" type="range" min="0" max="5" step="1" value="2">
+          <output id="range-value" for="range">24 м</output>
+        </div>
+      </div>
+      <div class="weapon" data-min="0" data-max="28"><span data-en="Cannon, up to 28 m">Гармата, до 28 м</span><span class="track"><i></i><b></b></span><span class="state"></span></div>
+      <div class="weapon" data-min="0" data-max="28"><span data-en="Ballista, up to 28 m">Баліста, до 28 м</span><span class="track"><i></i><b></b></span><span class="state"></span></div>
+      <div class="weapon" data-min="20" data-max="40"><span data-en="Catapult, 20–40 m">Катапульта, 20–40 м</span><span class="track"><i></i><b></b></span><span class="state"></span></div>
+      <div class="weapon" data-min="20" data-max="40"><span data-en="Mortar, 20–40 m">Мортира, 20–40 м</span><span class="track"><i></i><b></b></span><span class="state"></span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section skirmish" id="skirmish">
+  <div class="wrap">
+    <div class="head">
+      <h2 data-en="When the heroes go on foot, it's a Skirmish">Коли герої йдуть пішки, починається «Сутичка»</h2>
+      <p data-en="A turn-based card battle with one shared hand from three personal decks. Decks are built from 118 different cards, and there are 23 kinds of enemies. Read their intents and hit first whoever is about to hit hardest.">Покроковий картковий бій, у якому три особисті колоди дають одну спільну руку. Колоди збирають зі 118 різних карт, а ворогів у грі 23 види. Читайте їхні наміри й бийте першим того, хто замахнувся найсильніше.</p>
+    </div>
+    <a class="zoom frame wide" href="img/full/skirmish.jpg" data-cap="«Сутичка» на телефоні: рука карт і наміри ворогів" data-cap-en="A Skirmish on a phone: the hand of cards and the enemies' intents"><img src="img/skirmish.jpg" alt="" loading="lazy" width="1800" height="810"></a>
+    <h3 data-en="The Heart Call is the power of the commander's school">Поклик Серця — сила школи командира</h3>
+    <ul class="calls">
+      <li data-school="powder"><b data-en="Boiler Volley">Залп котла</b><span data-en="12 damage to all enemies">12 шкоди всім ворогам</span></li>
+      <li data-school="growth"><b data-en="Heartwood Sap">Сік серцевини</b><span data-en="every hero heals 10 and sheds Weak and Vulnerable">усі герої лікуються на 10 і скидають Слабкість та Вразливість</span></li>
+      <li data-school="dust"><b data-en="Funeral Bell">Похоронний дзвін</b><span data-en="8 Doom on all enemies, and the first downed hero stands up">усім ворогам Рок 8, а перший повалений герой встає</span></li>
+      <li data-school="sun"><b data-en="Sun Furnace">Сонячний горн</b><span data-en="every hero gains Ward 12 and Mirage">усі герої отримують Оберіг 12 і Міраж</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="section" id="dice">
+  <div class="wrap">
+    <div class="head">
+      <h2 data-en="Throw the Dice of Fate">Киньте Кості долі</h2>
+      <p data-en="Every school has its own die and trick. Try them right here, by the rules of the game.">У кожної школи свій кубик і свій трюк. Спробуйте їх просто тут, за правилами гри.</p>
+    </div>
+    <div class="tray">
+      <div class="tray-top">
+        <p data-en="Meet the difficulty to succeed. Beat it by 4 for a triumph. Fall short by 1–2 for a partial success. A natural 1 is a critical failure.">Досягніть складності, і це успіх. На 4 більше буде тріумф, на 1–2 менше — частковий успіх. Природна 1 означає критичний провал.</p>
+        <div class="difficulty">
+          <span data-en="Difficulty">Складність</span>
+          <button type="button" id="dc-down" aria-label="−">−</button>
+          <output id="dc">5</output>
+          <button type="button" id="dc-up" aria-label="+">+</button>
+        </div>
+      </div>
+      <div class="dice">
+        <article class="die" data-school="powder" data-sides="6">
+          <h3><span data-en="Powder">Порох</span><span>d6</span></h3>
+          <div class="face d6" aria-hidden="true">6</div>
+          <p class="trick" data-en="<b>Forged certainty</b>+1 to every throw, and a 1 is thrown again once."><b>Кована певність</b>+1 до кожного кидка, а одиниця раз перекидається.</p>
+          <p class="odds"></p>
+          <p class="verdict" aria-live="polite"></p>
+          <button class="btn throw" id="throw-powder" type="button" data-en="Throw">Кинути</button>
+        </article>
+        <article class="die" data-school="sun" data-sides="8">
+          <h3><span data-en="Sun">Сонце</span><span>d8</span></h3>
+          <div class="face d8" aria-hidden="true">8</div>
+          <p class="trick" data-en="<b>Mirage</b>Two dice on every throw. The better one counts."><b>Міраж</b>Щоразу два кубики. Рахується кращий.</p>
+          <p class="odds"></p>
+          <p class="verdict" aria-live="polite"></p>
+          <button class="btn throw" id="throw-sun" type="button" data-en="Throw">Кинути</button>
+        </article>
+        <article class="die" data-school="growth" data-sides="10">
+          <h3><span data-en="Growth">Ріст</span><span>d10</span></h3>
+          <div class="face d10" aria-hidden="true">10</div>
+          <p class="trick" data-en="<b>Sprout</b>A failure adds +1, up to +3. A success spends the sprouts."><b>Паросток</b>Провал додає +1, до +3. Успіх витрачає паростки.</p>
+          <p class="odds"></p>
+          <p class="verdict" aria-live="polite"></p>
+          <button class="btn throw" id="throw-growth" type="button" data-en="Throw">Кинути</button>
+        </article>
+        <article class="die" data-school="dust" data-sides="12">
+          <h3><span data-en="Ash">Прах</span><span>d12</span></h3>
+          <div class="face d12" aria-hidden="true">12</div>
+          <p class="trick" data-en="<b>Bell of fate</b>On a 12, throw once more and add. A 1 brings Ash, −1 here for three throws."><b>Дзвін долі</b>На 12 докиньте раз і додайте. 1 дає Попіл: тут це −1 на три кидки.</p>
+          <p class="odds"></p>
+          <p class="verdict" aria-live="polite"></p>
+          <button class="btn throw" id="throw-dust" type="button" data-en="Throw">Кинути</button>
+        </article>
+      </div>
+      <div class="tray-foot"><button class="btn quiet" id="throw-all" type="button" data-en="Throw all four">Кинути всі чотири</button></div>
+    </div>
+  </div>
+</section>
+
+<section class="section seals" id="seals">
+  <div class="wrap">
+    <div class="head">
+      <h2 data-en="Seals hide their magic until broken">Печаті ховають магію до зламу</h2>
+      <p data-en="You see the backs of the cards, never the faces. A Start and an End make a short spell. Add a Middle for the full one.">Ви бачите сорочки карт, але не лиця. Початок і Кінець дають коротке закляття. Із Серединою воно стає повним.</p>
+    </div>
+    <article class="feature">
+      <a class="zoom frame" href="img/full/seal-reveal.jpg" data-cap="Три зламані печаті розкрилися картами в «Сутичці»" data-cap-en="Three broken seals revealed as cards in a Skirmish"><img src="img/seal-reveal.jpg" alt="" loading="lazy" width="1132" height="637"></a>
+      <div class="feature-text">
+        <h3 data-en="Three cards become one spell">Три карти стають одним закляттям</h3>
+        <p data-en="Broken seals fly out as cards, turn over and merge. A spell may strike, heal, shield or curse, and the riskiest can hit back at you.">Зламані печаті вилітають картами, перевертаються й зливаються. Закляття може вдарити, зцілити, захистити чи проклясти, а найризикованіші б’ють і по вас.</p>
+      </div>
+    </article>
+    <div class="seal-row">
+      <figure>
+        <a class="zoom" href="img/full/seal-1.jpg" data-cap="Печать із помаранчевим сургучем" data-cap-en="A seal with orange wax"><img src="img/seal-1.jpg" alt="" loading="lazy" width="420" height="525"></a>
+        <figcaption><b data-en="Start">Початок</b><span data-en="decides what the spell does">вирішує, що робить закляття</span></figcaption>
+      </figure>
+      <figure>
+        <a class="zoom" href="img/full/seal-2.jpg" data-cap="Печать із фіолетовим сургучем" data-cap-en="A seal with violet wax"><img src="img/seal-2.jpg" alt="" loading="lazy" width="420" height="525"></a>
+        <figcaption><b data-en="Middle">Середина</b><span data-en="changes it">змінює його</span></figcaption>
+      </figure>
+      <figure>
+        <a class="zoom" href="img/full/seal-3.jpg" data-cap="Печать із зеленим сургучем" data-cap-en="A seal with green wax"><img src="img/seal-3.jpg" alt="" loading="lazy" width="420" height="525"></a>
+        <figcaption><b data-en="End">Кінець</b><span data-en="adds the finale">додає фінал</span></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="demo">
+  <div class="wrap">
+    <div class="head">
+      <h2 data-en="A first journey in about fifteen minutes">Перший похід приблизно за п’ятнадцять хвилин</h2>
+    </div>
+    <div class="demo">
+      <a class="zoom frame" href="img/full/tutorial.jpg" data-cap="Вікно «Перший похід?» із Торгрімом Ключем" data-cap-en="The “First journey?” window with Thorgrim Wrench"><img src="img/tutorial.jpg" alt="" loading="lazy" width="1300" height="731"></a>
+      <div class="demo-text">
+        <p data-en="Thorgrim Wrench greets you, and heroes of all four factions take turns explaining the game on a short map.">Торгрім Ключ зустрічає вас, а далі герої чотирьох фракцій по черзі пояснюють гру на короткій мапі.</p>
+        <ol class="stops">
+          <li data-en="A powder trap and your first throw of the dice">Порохова пастка й перший кидок кубика</li>
+          <li data-en="A roadblock and a Skirmish">Застава на дорозі й «Сутичка»</li>
+          <li data-en="A raiders' wagon and a machine battle">Віз рейдерів і бій машин</li>
+        </ol>
+        <p class="muted" data-en="The tutorial never touches your saved campaign, and everyone who plays it meets the same battles.">Навчання не зачіпає збережену кампанію, а бої в ньому для всіх однакові.</p>
+      </div>
+    </div>
+    <dl class="status">
+      <div><dt data-en="Genre">Жанр</dt><dd data-en="Turn-based fantasy strategy with a card battle and dice.">Покрокова фентезі-стратегія з картковим боєм і кубиками.</dd></div>
+      <div><dt data-en="Platforms">Платформи</dt><dd data-en="Windows. Android and iOS are in development.">Windows. Android та iOS у розробці.</dd></div>
+      <div><dt data-en="Languages">Мови</dt><dd data-en="Ukrainian and English.">Українська й англійська.</dd></div>
+      <div><dt data-en="Campaigns">Кампанії</dt><dd data-en="Awakening of the Seals is playable. The Ashen Bells and The Thorn Crown will come later.">«Пробудження Печатей» можна грати. «Попелясті Дзвони» й «Тернова Корона» будуть згодом.</dd></div>
+    </dl>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Ashen Wheels · Попелясті Колеса</span>
+    <span data-en="Captures from the game prototype and faction illustrations.">Кадри з прототипу гри та ілюстрації фракцій.</span>
+  </div>
+</footer>
+
+<dialog class="viewer" id="viewer" aria-labelledby="viewer-caption">
+  <div class="viewer-tools">
+    <span class="count" id="viewer-count"></span>
+    <button type="button" id="zoom-out" data-label="out">−</button>
+    <button type="button" class="percent" id="zoom-reset" data-label="fit">100%</button>
+    <button type="button" id="zoom-in" data-label="in">+</button>
+    <button type="button" id="viewer-close" data-label="close" autofocus>×</button>
+  </div>
+  <div class="viewer-body">
+    <div class="stage" id="stage"><img id="viewer-image" class="loading" alt="" draggable="false"></div>
+    <p class="viewer-note" id="viewer-note" role="status"></p>
+    <button type="button" class="step prev" id="viewer-prev" data-label="prev">‹</button>
+    <button type="button" class="step next" id="viewer-next" data-label="next">›</button>
+  </div>
+  <div class="viewer-foot">
+    <span id="viewer-caption"></span>
+    <small data-en="Wheel or pinch to zoom, drag to move, arrows or swipe to browse">Колесо або щипок — масштаб, перетяг — рух, стрілки або свайп — гортання</small>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  'use strict';
+
+  var TEXT = {
+    uk: {
+      out: 'Зменшити', in: 'Збільшити', fit: 'Вмістити в екран', close: 'Закрити', prev: 'Попередня', next: 'Наступна',
+      loading: 'Завантаження…', error: 'Картинку не вдалося завантажити. Перегляньте наступну.', meters: ' м', reach: 'дістає', near: 'заблизько', far: 'задалеко',
+      tiers: ['Критичний провал!', 'Провал', 'Частковий успіх', 'Успіх', 'Тріумф!'],
+      chance: 'Успіх', triumph: 'тріумф', against: 'проти', reroll: 'перекинуто', taken: 'взято', bell: 'Дзвін!', sprouts: 'паростки', ash: 'Попіл'
+    },
+    en: {
+      out: 'Zoom out', in: 'Zoom in', fit: 'Fit to screen', close: 'Close', prev: 'Previous', next: 'Next',
+      loading: 'Loading…', error: 'The picture did not load. Try the next one.', meters: ' m', reach: 'in reach', near: 'too close', far: 'too far',
+      tiers: ['Critical failure!', 'Failure', 'Partial success', 'Success', 'Triumph!'],
+      chance: 'Success', triumph: 'triumph', against: 'against', reroll: 'thrown again', taken: 'kept', bell: 'Bell!', sprouts: 'sprouts', ash: 'Ash'
+    }
+  };
+
+  var lang = 'uk';
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function byId(id) { return document.getElementById(id); }
+  function all(selector) { return Array.prototype.slice.call(document.querySelectorAll(selector)); }
+  function caption(link) { return link.getAttribute(lang === 'en' ? 'data-cap-en' : 'data-cap'); }
+
+  /* ---------- picture viewer ---------- */
+  var viewer = byId('viewer');
+  var stage = byId('stage');
+  var picture = byId('viewer-image');
+  var note = byId('viewer-note');
+  var pictures = all('a.zoom');
+  var current = 0;
+  var opener = null;
+  var view = { scale: 1, fit: 1, x: 0, y: 0, ready: false };
+  var pointers = new Map();
+  var gesture = null;
+  var lastTap = null;
+
+  function openViewer(index, from) {
+    opener = from;
+    if (!viewer.open) viewer.showModal();
+    document.documentElement.classList.add('viewer-open');
+    show(index);
+  }
+
+  function show(index) {
+    current = (index + pictures.length) % pictures.length;
+    view.ready = false;
+    lastTap = null;
+    picture.classList.add('loading');
+    note.textContent = TEXT[lang].loading;
+    picture.src = pictures[current].getAttribute('href');
+    describe();
+  }
+
+  function describe() {
+    byId('viewer-count').textContent = (current + 1) + ' / ' + pictures.length;
+    byId('viewer-caption').textContent = caption(pictures[current]);
+    picture.alt = caption(pictures[current]);
+  }
+
+  function fit() {
+    if (!view.ready || !viewer.open) return;
+    view.fit = Math.min(stage.clientWidth / picture.naturalWidth, stage.clientHeight / picture.naturalHeight);
+    view.scale = view.fit;
+    view.x = view.y = 0;
+    draw();
+  }
+
+  function isZoomed() { return view.ready && view.scale > view.fit * 1.02; }
+
+  function keepInside(position, size, room) {
+    return size <= room ? (room - size) / 2 : Math.min(0, Math.max(room - size, position));
+  }
+
+  function draw() {
+    var width = picture.naturalWidth * view.scale;
+    var height = picture.naturalHeight * view.scale;
+    view.x = keepInside(view.x, width, stage.clientWidth);
+    view.y = keepInside(view.y, height, stage.clientHeight);
+    picture.style.transform = 'translate(' + view.x + 'px,' + view.y + 'px) scale(' + view.scale + ')';
+    byId('zoom-reset').textContent = Math.round(view.scale * 100) + '%';
+    stage.classList.toggle('zoomed', isZoomed());
+  }
+
+  function zoomAt(scale, x, y) {
+    if (!view.ready) return;
+    var next = Math.max(view.fit, Math.min(Math.max(view.fit * 4, 2.5), scale));
+    view.x = x - (x - view.x) * next / view.scale;
+    view.y = y - (y - view.y) * next / view.scale;
+    view.scale = next;
+    draw();
+  }
+
+  function zoomCentre(factor) { zoomAt(view.scale * factor, stage.clientWidth / 2, stage.clientHeight / 2); }
+  function toggleZoom(point) { if (isZoomed()) fit(); else zoomAt(Math.max(1, view.fit * 2.2), point.x, point.y); }
+
+  function stagePoint(event) {
+    var box = stage.getBoundingClientRect();
+    return { x: event.clientX - box.left, y: event.clientY - box.top };
+  }
+
+  function isOnPicture(point) {
+    return point.x >= view.x && point.x <= view.x + picture.naturalWidth * view.scale
+      && point.y >= view.y && point.y <= view.y + picture.naturalHeight * view.scale;
+  }
+
+  function pair() {
+    var points = Array.from(pointers.values());
+    return {
+      x: (points[0].x + points[1].x) / 2,
+      y: (points[0].y + points[1].y) / 2,
+      size: Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y) || 1
+    };
+  }
+
+  stage.addEventListener('pointerdown', function (event) {
+    if (event.button > 0) return;
+    var point = stagePoint(event);
+    pointers.set(event.pointerId, point);
+    try { stage.setPointerCapture(event.pointerId); } catch (error) { /* the pointer is already gone */ }
+    if (pointers.size === 1) gesture = { start: point, moved: false, many: false, zoomed: isZoomed() };
+    else if (gesture) gesture.many = true;
+  });
+
+  stage.addEventListener('pointermove', function (event) {
+    if (!pointers.has(event.pointerId) || !gesture) return;
+    var before = pointers.size === 2 ? pair() : null;
+    var previous = pointers.get(event.pointerId);
+    var point = stagePoint(event);
+    pointers.set(event.pointerId, point);
+    if (Math.hypot(point.x - gesture.start.x, point.y - gesture.start.y) > 8) gesture.moved = true;
+
+    if (before) {
+      var after = pair();
+      zoomAt(view.scale * after.size / before.size, after.x, after.y);
+      view.x += after.x - before.x;
+      view.y += after.y - before.y;
+      draw();
+    } else if (pointers.size === 1 && isZoomed()) {
+      view.x += point.x - previous.x;
+      view.y += point.y - previous.y;
+      stage.classList.add('dragging');
+      draw();
+    }
+  });
+
+  stage.addEventListener('pointerup', function (event) {
+    if (!pointers.delete(event.pointerId) || pointers.size || !gesture) return;
+    var done = gesture;
+    var point = stagePoint(event);
+    var dx = point.x - done.start.x;
+    var dy = point.y - done.start.y;
+    gesture = null;
+    stage.classList.remove('dragging');
+    if (done.many || !view.ready) return;
+
+    if (done.moved) {
+      if (!done.zoomed && Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) show(current + (dx < 0 ? 1 : -1));
+      return;
+    }
+    if (!done.zoomed && !isOnPicture(point)) { viewer.close(); return; }
+    if (event.pointerType === 'mouse') { toggleZoom(point); return; }
+
+    var now = Date.now();
+    if (lastTap && now - lastTap.time < 350 && Math.hypot(point.x - lastTap.x, point.y - lastTap.y) < 40) {
+      lastTap = null;
+      toggleZoom(point);
+    } else {
+      lastTap = { time: now, x: point.x, y: point.y };
+    }
+  });
+
+  function cancelPointer(event) {
+    pointers.delete(event.pointerId);
+    if (!pointers.size) { gesture = null; stage.classList.remove('dragging'); }
+  }
+  stage.addEventListener('pointercancel', cancelPointer);
+
+  stage.addEventListener('wheel', function (event) {
+    event.preventDefault();
+    var point = stagePoint(event);
+    var delta = event.deltaY * (event.deltaMode ? 30 : 1);
+    zoomAt(view.scale * Math.exp(-delta * 0.0015), point.x, point.y);
+  }, { passive: false });
+
+  picture.addEventListener('load', function () {
+    view.ready = true;
+    note.textContent = '';
+    picture.classList.remove('loading');
+    fit();
+  });
+  picture.addEventListener('error', function () { note.textContent = TEXT[lang].error; });
+
+  pictures.forEach(function (link, index) {
+    link.addEventListener('click', function (event) { event.preventDefault(); openViewer(index, link); });
+  });
+  byId('hero-open').addEventListener('click', function () { openViewer(0, this); });
+  byId('zoom-in').addEventListener('click', function () { zoomCentre(1.4); });
+  byId('zoom-out').addEventListener('click', function () { zoomCentre(1 / 1.4); });
+  byId('zoom-reset').addEventListener('click', fit);
+  byId('viewer-close').addEventListener('click', function () { viewer.close(); });
+  byId('viewer-prev').addEventListener('click', function () { show(current - 1); });
+  byId('viewer-next').addEventListener('click', function () { show(current + 1); });
+  viewer.addEventListener('keydown', function (event) {
+    if (event.key === 'ArrowRight') show(current + 1);
+    else if (event.key === 'ArrowLeft') show(current - 1);
+    else if (event.key === '+' || event.key === '=') zoomCentre(1.4);
+    else if (event.key === '-') zoomCentre(1 / 1.4);
+    else if (event.key === '0') fit();
+    else return;
+    event.preventDefault();
+  });
+  viewer.addEventListener('close', function () {
+    if (viewer.open) return; // the event comes a task later: the viewer may already show another picture
+    document.documentElement.classList.remove('viewer-open');
+    pointers.clear();
+    gesture = null;
+    stage.classList.remove('dragging');
+    if (opener) opener.focus({ preventScroll: true });
+  });
+  // the stage also changes with the page's scrollbar and the caption's lines, not only with the window
+  new ResizeObserver(fit).observe(stage);
+
+  /* ---------- range ruler (stops 7 / 12 / 18 m) ---------- */
+  var DISTANCES = [14, 19, 24, 25, 30, 36];
+  var range = byId('range');
+  function showRange() {
+    var distance = DISTANCES[range.value];
+    byId('range-value').textContent = distance + TEXT[lang].meters;
+    all('.weapon').forEach(function (row) {
+      var min = Number(row.dataset.min);
+      var max = Number(row.dataset.max);
+      var band = row.querySelector('.track i');
+      band.style.left = (min * 2.5) + '%';
+      band.style.width = ((max - min) * 2.5) + '%';
+      row.querySelector('.track b').style.left = (distance * 2.5) + '%';
+      row.classList.toggle('can', distance >= min && distance <= max);
+      row.querySelector('.state').textContent = TEXT[lang][distance < min ? 'near' : distance > max ? 'far' : 'reach'];
+    });
+  }
+  range.addEventListener('input', showRange);
+
+  /* ---------- dice, as Integration/Dice and GameIntegration._dice ---------- */
+  var RULES = { partial: 2, triumph: 4, forged: 1, sproutCap: 3, ashPenalty: 1, ashThrows: 3 };
+  var TIER = { critical: 0, failure: 1, partial: 2, success: 3, triumph: 4 };
+  var hero = { sprouts: 0, ash: 0 };
+  var difficulty = 5;
+
+  function classify(natural, total, target) {
+    if (natural === 1) return TIER.critical;
+    if (total >= target + RULES.triumph) return TIER.triumph;
+    if (total >= target) return TIER.success;
+    return total >= target - RULES.partial ? TIER.partial : TIER.failure;
+  }
+
+  function bonus(school) {
+    if (school === 'powder') return RULES.forged;
+    if (school === 'growth') return hero.sprouts;
+    if (school === 'dust' && hero.ash > 0) return -RULES.ashPenalty;
+    return 0;
+  }
+
+  // draw() gives one face; the same trick serves the throw and the exact odds
+  function applyTrick(school, sides, draw) {
+    var first = draw();
+    var second;
+    if (school === 'powder' && first === 1) { second = draw(); return { faces: [first, second], natural: second, total: second }; }
+    if (school === 'sun') { second = draw(); var kept = Math.max(first, second); return { faces: [first, second], natural: kept, total: kept }; }
+    if (school === 'dust' && first === sides) { second = draw(); return { faces: [first, second], natural: first, total: first + second }; }
+    return { faces: [first], natural: first, total: first };
+  }
+
+  function odds(school, sides, target, atLeast) {
+    var hits = 0;
+    for (var a = 1; a <= sides; a++) {
+      for (var b = 1; b <= sides; b++) {
+        var queue = [a, b];
+        var outcome = applyTrick(school, sides, function () { return queue.shift(); });
+        if (classify(outcome.natural, outcome.total + bonus(school), target) >= atLeast) hits++;
+      }
+    }
+    return Math.round(hits * 100 / (sides * sides));
+  }
+
+  function showOdds() {
+    var words = TEXT[lang];
+    all('.die').forEach(function (die) {
+      var school = die.dataset.school;
+      var sides = Number(die.dataset.sides);
+      var text = words.chance + ' ' + odds(school, sides, difficulty, TIER.success) + '%, ' + words.triumph + ' ' + odds(school, sides, difficulty, TIER.triumph) + '%';
+      if (school === 'growth' && hero.sprouts) text += ' · ' + words.sprouts + ' +' + hero.sprouts;
+      if (school === 'dust' && hero.ash) text += ' · ' + words.ash + ' −1 (' + hero.ash + ')';
+      die.querySelector('.odds').textContent = text;
+    });
+  }
+
+  function showVerdict(die) {
+    var roll = die.lastRoll;
+    if (!roll) return;
+    var words = TEXT[lang];
+    var details = [roll.total + ' ' + words.against + ' ' + roll.difficulty];
+    if (roll.school === 'powder' && roll.faces.length > 1) details.push('1 → ' + roll.faces[1] + ', ' + words.reroll);
+    if (roll.school === 'sun') details.push(roll.faces.join(' / ') + ', ' + words.taken + ' ' + roll.natural);
+    if (roll.school === 'dust' && roll.faces.length > 1) details.push(words.bell + ' ' + roll.faces.join(' + '));
+    var title = document.createElement('strong');
+    title.className = roll.tier >= TIER.success ? 'good' : roll.tier < TIER.partial ? 'bad' : '';
+    title.textContent = words.tiers[roll.tier];
+    var verdict = die.querySelector('.verdict');
+    verdict.textContent = '';
+    verdict.append(title, details.join(' · '));
+  }
+
+  function randomFace(sides) { return 1 + Math.floor(Math.random() * sides); }
+
+  function throwDie(die) {
+    var button = die.querySelector('.throw');
+    if (button.disabled) return;
+    var school = die.dataset.school;
+    var sides = Number(die.dataset.sides);
+    var face = die.querySelector('.face');
+    var roll = applyTrick(school, sides, function () { return randomFace(sides); });
+    roll.school = school;
+    roll.difficulty = difficulty;
+    roll.total += bonus(school);
+    roll.tier = classify(roll.natural, roll.total, difficulty);
+    button.disabled = true;
+
+    function land() {
+      face.classList.remove('rolling');
+      face.textContent = roll.school === 'dust' ? roll.faces[roll.faces.length - 1] : roll.natural;
+      if (school === 'growth') {
+        if (roll.tier <= TIER.failure) hero.sprouts = Math.min(RULES.sproutCap, hero.sprouts + 1);
+        else if (roll.tier >= TIER.success) hero.sprouts = 0;
+      }
+      if (school === 'dust') hero.ash = roll.natural === 1 ? RULES.ashThrows : Math.max(0, hero.ash - 1);
+      die.lastRoll = roll;
+      button.disabled = false;
+      showVerdict(die);
+      showOdds();
+    }
+
+    if (reduceMotion) { land(); return; }
+    face.classList.add('rolling');
+    var ticks = 0;
+    var timer = setInterval(function () {
+      face.textContent = randomFace(sides);
+      if (++ticks >= 9) { clearInterval(timer); land(); }
+    }, 60);
+  }
+
+  all('.die').forEach(function (die) { die.querySelector('.throw').addEventListener('click', function () { throwDie(die); }); });
+  byId('throw-all').addEventListener('click', function () { all('.die').forEach(throwDie); });
+  function setDifficulty(value) {
+    difficulty = Math.max(2, Math.min(12, value));
+    byId('dc').textContent = difficulty;
+    showOdds();
+  }
+  byId('dc-down').addEventListener('click', function () { setDifficulty(difficulty - 1); });
+  byId('dc-up').addEventListener('click', function () { setDifficulty(difficulty + 1); });
+
+  /* ---------- language: Ukrainian lives in the markup, English in data-en ---------- */
+  var translated = all('[data-en]');
+  var ukrainian = translated.map(function (element) { return element.innerHTML; });
+
+  function setLanguage(next) {
+    lang = next === 'en' ? 'en' : 'uk';
+    document.documentElement.lang = lang;
+    translated.forEach(function (element, index) { element.innerHTML = lang === 'en' ? element.getAttribute('data-en') : ukrainian[index]; });
+    pictures.forEach(function (link) { link.querySelector('img').alt = caption(link); });
+    all('[data-label]').forEach(function (button) {
+      button.setAttribute('aria-label', TEXT[lang][button.dataset.label]);
+      button.title = TEXT[lang][button.dataset.label];
+    });
+    all('[data-lang]').forEach(function (button) { button.setAttribute('aria-pressed', String(button.dataset.lang === lang)); });
+    showRange();
+    showOdds();
+    all('.die').forEach(showVerdict);
+    if (viewer.open) describe();
+    try { localStorage.setItem('aw-lang', lang); } catch (error) { /* storage is blocked */ }
+  }
+
+  all('button[data-lang]').forEach(function (button) { button.addEventListener('click', function () { setLanguage(button.dataset.lang); }); });
+
+  var saved = 'uk';
+  try { saved = localStorage.getItem('aw-lang') || 'uk'; } catch (error) { /* storage is blocked */ }
+  setLanguage(saved);
+})();
+</script>
+</body>
+</html>
