@@ -139,6 +139,43 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 .road p { color: var(--muted); font-size: 1rem; }
 
+/* the machine's heart: rules, an x-ray to sweep across, the four hearts */
+.heart { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 28px 40px; align-items: start; margin-top: 64px; padding-top: 44px; border-top: 1px solid var(--line); }
+.heart-text { display: grid; gap: 14px; min-width: 0; }
+.heart-text h3 { font-size: 2rem; color: var(--gold-hi); }
+.heart-text > p { color: var(--muted); }
+.heart-rules { list-style: none; display: grid; gap: 14px; margin-top: 6px; }
+.heart-rules li { color: var(--muted); font-size: 1rem; padding-left: 16px; border-left: 2px solid var(--gold); }
+.heart-rules b { display: block; font: 700 1.2rem/1.3 var(--display); color: var(--text); margin-bottom: 2px; }
+.heart-look { display: grid; gap: 14px; min-width: 0; }
+.xray-figure { display: grid; gap: 8px; }
+.xray { --cut: 66%; position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: #091127; box-shadow: 0 0 0 1px var(--line); touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.xray .zoom { position: absolute; inset: 0; background: none; }
+.xray .zoom img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; -webkit-user-drag: none; }
+.xray .xray-inside { clip-path: inset(0 calc(100% - var(--cut)) 0 0); }
+.xray .xray-inside::after { right: auto; left: 6px; }
+.xray-line { position: absolute; top: 0; bottom: 0; left: var(--cut); width: 2px; margin-left: -1px; background: var(--gold-hi); box-shadow: 0 0 10px rgba(243, 216, 152, .7); pointer-events: none; }
+.xray-line i {
+  position: absolute; left: 50%; top: 80%; width: 42px; height: 42px; margin: -21px 0 0 -21px; border-radius: 50%; background: var(--night); border: 2px solid var(--gold-hi);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' stroke='%23f3d898' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l-5 6 5 6M15 6l5 6-5 6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: center;
+}
+.xray-range { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.xray-range:focus-visible ~ .xray-line i { box-shadow: 0 0 0 3px var(--night), 0 0 0 5px var(--gold-hi); }
+.xray-tag { position: absolute; bottom: 10px; padding: 4px 10px; background: var(--veil); font: 700 .9rem/1.2 var(--display); letter-spacing: .04em; pointer-events: none; }
+.xray-tag.inside { left: 10px; color: #8fc4ff; }
+.xray-tag.outside { right: 10px; color: var(--gold-hi); }
+.heart-picks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.heart-pick { min-height: 48px; padding: 8px 10px; border: 1px solid var(--line); background: var(--twilight); color: var(--school); font: 700 1rem/1.15 var(--display); text-wrap: balance; }
+.heart-pick[aria-pressed="true"] { border-color: var(--school); box-shadow: inset 0 -3px 0 var(--school); background: var(--plate); }
+.heart-pick:hover { border-color: var(--school); }
+.heart-card { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 28px; }
+.heart-card p { flex: 1 1 280px; color: var(--muted); font-size: 1rem; }
+.heart-card p b { display: block; color: var(--school); font: 700 1.15rem/1.3 var(--display); }
+.heart-card dl { display: flex; gap: 22px; margin: 0; }
+.heart-card dt { color: var(--muted); font-size: var(--small); }
+.heart-card dd { margin: 0; font: 700 1.25rem/1.2 var(--display); font-variant-numeric: lining-nums; }
+
 /* realms */
 .schools { background: var(--twilight); }
 .realms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px 36px; }
@@ -275,6 +312,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 }
 @media (max-width: 860px) {
   .feature, .demo, .realms { grid-template-columns: minmax(0, 1fr); }
+  .heart { grid-template-columns: minmax(0, 1fr); margin-top: 48px; padding-top: 32px; }
   .road, .valleys { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .battle-facts { grid-template-columns: minmax(0, 1fr); }
 }
@@ -295,6 +333,8 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 }
 @media (max-width: 500px) {
   .dice, .calls, .status { grid-template-columns: minmax(0, 1fr); }
+  .heart-picks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .heart-card dl { gap: 18px; }
   .die { grid-template-rows: none; }
   .actions .btn { flex: 1 1 auto; }
   .mark { font-size: 1.05rem; }
@@ -391,6 +431,52 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         <p data-en="An enemy machine means a machine battle, a band on foot means a Skirmish. Victories bring scrap, ammunition, cards and seals.">З ворожою машиною буде бій машин, із пішим загоном «Сутичка». Перемоги приносять брухт, набої, карти й печаті.</p>
       </li>
     </ol>
+    <article class="heart" id="heart">
+      <div class="heart-text">
+        <h3 data-en="Guard the machine's heart">Бережи серце машини</h3>
+        <p data-en="Every machine is built around one heart. It powers the mechanisms and pulls the machine: load it with too much weight, and it will not budge.">Кожну машину будують довкола одного серця. Воно дає силу механізмам і тягне машину: навантаж забагато, і вона не зрушить з місця.</p>
+        <ul class="heart-rules">
+          <li data-en="<b>Everything holds on to it</b>Modules hold on to the heart through each other. Break the link, and the parts cut off fall away."><b>На ньому все тримається</b>Модулі кріпляться до серця одне через одне. Переб’ють зв’язок, і відрізані частини відпадуть.</li>
+          <li data-en="<b>A broken heart loses the battle</b>The machine stops, and the fight is over."><b>Розбите серце — програний бій</b>Машина зупиняється, і бій закінчено.</li>
+          <li data-en="<b>Hide it deep</b>A shot breaks the modules in its way first, and a hidden heart cannot be aimed at directly."><b>Сховай його глибше</b>Постріл спершу ламає модулі на своєму шляху, а в сховане серце не прицілишся напряму.</li>
+        </ul>
+      </div>
+      <div class="heart-look">
+        <figure class="xray-figure">
+          <div class="xray" id="xray">
+            <a class="zoom xray-plain" id="xray-plain" href="img/full/heart-powder-plain.jpg" data-cap="Стартова машина Гномів Порохівників ззовні: серця не видно" data-cap-en="The starting machine of the Powder Dwarves from outside: its heart is out of sight"><img src="img/heart-powder-plain.jpg" alt="" loading="lazy" width="1100" height="825" draggable="false"></a>
+            <a class="zoom xray-inside" id="xray-inside" href="img/full/heart-powder-xray.jpg" data-cap="Рентген стартової машини Гномів Порохівників: паровий котел у самому центрі" data-cap-en="X-ray of the starting machine of the Powder Dwarves: the steam boiler right in the middle"><img src="img/heart-powder-xray.jpg" alt="" loading="lazy" width="1100" height="825" draggable="false"></a>
+            <input class="xray-range" id="xray-range" type="range" min="0" max="100" value="66" data-label="xray">
+            <span class="xray-line" aria-hidden="true"><i></i></span>
+            <span class="xray-tag inside" aria-hidden="true" data-en="X-ray">Рентген</span>
+            <span class="xray-tag outside" aria-hidden="true" data-en="Outside">Ззовні</span>
+          </div>
+          <figcaption class="hint" data-en="Sweep across the machine to look inside. Click to take a closer look.">Проведи по машині, щоб зазирнути всередину. Натисни, щоб роздивитись.</figcaption>
+        </figure>
+        <div class="heart-picks" role="group" aria-label="Серця фракцій">
+          <button type="button" class="heart-pick" data-school="powder" aria-pressed="true" data-en="Steam boiler">Паровий котел</button>
+          <button type="button" class="heart-pick" data-school="growth" aria-pressed="false" data-en="Living heartwood">Жива серцевина</button>
+          <button type="button" class="heart-pick" data-school="dust" aria-pressed="false" data-en="Burial sarcophagus">Поховальний саркофаг</button>
+          <button type="button" class="heart-pick" data-school="sun" aria-pressed="false" data-en="Sun furnace">Сонячний горн</button>
+        </div>
+        <div class="heart-card" data-school="powder">
+          <p data-en="<b>Powder Dwarves</b>The boiler feeds steam to every mechanism. It is the toughest heart and the weakest puller."><b>Гноми Порохівники</b>Котел дає пару всім механізмам. Він найміцніший із сердець, але тягне найслабше.</p>
+          <dl><div><dt data-en="Power">Сила</dt><dd>+2</dd></div><div><dt data-en="Structure">Міцність</dt><dd>8</dd></div><div><dt data-en="Weight">Вага</dt><dd data-en="4 t">4 т</dd></div></dl>
+        </div>
+        <div class="heart-card" data-school="growth" hidden>
+          <p data-en="<b>Thorn Crown</b>A living crystal core, lighter than the boiler and pulling harder."><b>Тернова Корона</b>Жива кришталева серцевина, легша за котел і тягне сильніше.</p>
+          <dl><div><dt data-en="Power">Сила</dt><dd>+3</dd></div><div><dt data-en="Structure">Міцність</dt><dd>6</dd></div><div><dt data-en="Weight">Вага</dt><dd data-en="3 t">3 т</dd></div></dl>
+        </div>
+        <div class="heart-card" data-school="dust" hidden>
+          <p data-en="<b>Necropolis of the Ashen Bells</b>A burial sarcophagus that feeds the machine's mechanisms."><b>Некрополіс Попелястих Дзвонів</b>Поховальний саркофаг, що живить механізми машини.</p>
+          <dl><div><dt data-en="Power">Сила</dt><dd>+3</dd></div><div><dt data-en="Structure">Міцність</dt><dd>6</dd></div><div><dt data-en="Weight">Вага</dt><dd data-en="3 t">3 т</dd></div></dl>
+        </div>
+        <div class="heart-card" data-school="sun" hidden>
+          <p data-en="<b>Empire of the Glass Dunes</b>A furnace where the desert sun burns."><b>Імперія Скляних Дюн</b>Горн, у якому палає сонце пустелі.</p>
+          <dl><div><dt data-en="Power">Сила</dt><dd>+3</dd></div><div><dt data-en="Structure">Міцність</dt><dd>6</dd></div><div><dt data-en="Weight">Вага</dt><dd data-en="3 t">3 т</dd></div></dl>
+        </div>
+      </div>
+    </article>
   </div>
 </section>
 
@@ -705,13 +791,13 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       out: 'Зменшити', in: 'Збільшити', fit: 'Вмістити в екран', close: 'Закрити', prev: 'Попередня', next: 'Наступна',
       loading: 'Завантаження…', error: 'Картинку не вдалося завантажити. Переглянь наступну.', meters: ' м', reach: 'дістає', near: 'заблизько', far: 'задалеко',
       tiers: ['Критичний провал!', 'Провал', 'Частковий успіх', 'Успіх', 'Тріумф!'],
-      chance: 'Успіх', triumph: 'тріумф', against: 'проти', reroll: 'перекинуто', taken: 'взято', bell: 'Дзвін!', sprouts: 'паростки', ash: 'Попіл'
+      chance: 'Успіх', triumph: 'тріумф', against: 'проти', reroll: 'перекинуто', taken: 'взято', bell: 'Дзвін!', sprouts: 'паростки', ash: 'Попіл', xray: 'Межа рентгена'
     },
     en: {
       out: 'Zoom out', in: 'Zoom in', fit: 'Fit to screen', close: 'Close', prev: 'Previous', next: 'Next',
       loading: 'Loading…', error: 'The picture did not load. Try the next one.', meters: ' m', reach: 'in reach', near: 'too close', far: 'too far',
       tiers: ['Critical failure!', 'Failure', 'Partial success', 'Success', 'Triumph!'],
-      chance: 'Success', triumph: 'triumph', against: 'against', reroll: 'thrown again', taken: 'kept', bell: 'Bell!', sprouts: 'sprouts', ash: 'Ash'
+      chance: 'Success', triumph: 'triumph', against: 'against', reroll: 'thrown again', taken: 'kept', bell: 'Bell!', sprouts: 'sprouts', ash: 'Ash', xray: 'X-ray edge'
     }
   };
 
@@ -920,6 +1006,100 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   });
   // the stage also changes with the page's scrollbar and the caption's lines, not only with the window
   new ResizeObserver(fit).observe(stage);
+
+  /* ---------- the machine's heart: an x-ray to sweep across (shots of GameHeartXrayShots) ---------- */
+  var HEARTS = {
+    powder: { of: 'Гномів Порохівників', heart: 'паровий котел', ofEn: 'the Powder Dwarves', heartEn: 'the steam boiler' },
+    growth: { of: 'Тернової Корони', heart: 'жива серцевина', ofEn: 'the Thorn Crown', heartEn: 'the living heartwood' },
+    dust: { of: 'Некрополіса Попелястих Дзвонів', heart: 'поховальний саркофаг', ofEn: 'the Necropolis of the Ashen Bells', heartEn: 'the burial sarcophagus' },
+    sun: { of: 'Імперії Скляних Дюн', heart: 'сонячний горн', ofEn: 'the Empire of the Glass Dunes', heartEn: 'the sun furnace' }
+  };
+  var xray = byId('xray');
+  var xrayRange = byId('xray-range');
+  var sweep = null;
+  var touched = false;
+
+  function setCut(percent) {
+    percent = Math.max(0, Math.min(100, percent));
+    xray.style.setProperty('--cut', percent + '%');
+    xrayRange.value = Math.round(percent);
+  }
+
+  function cutAt(event) {
+    var box = xray.getBoundingClientRect();
+    if (box.width) setCut((event.clientX - box.left) / box.width * 100);
+  }
+
+  function showHeart(school) {
+    var heart = HEARTS[school];
+    [['xray-plain', 'plain'], ['xray-inside', 'xray']].forEach(function (pair) {
+      var link = byId(pair[0]);
+      link.href = 'img/full/heart-' + school + '-' + pair[1] + '.jpg';
+      link.querySelector('img').src = 'img/heart-' + school + '-' + pair[1] + '.jpg';
+      if (pair[1] === 'plain') {
+        link.setAttribute('data-cap', 'Стартова машина ' + heart.of + ' ззовні: серця не видно');
+        link.setAttribute('data-cap-en', 'The starting machine of ' + heart.ofEn + ' from outside: its heart is out of sight');
+      } else {
+        link.setAttribute('data-cap', 'Рентген стартової машини ' + heart.of + ': ' + heart.heart + ' у самому центрі');
+        link.setAttribute('data-cap-en', 'X-ray of the starting machine of ' + heart.ofEn + ': ' + heart.heartEn + ' right in the middle');
+      }
+      link.querySelector('img').alt = caption(link);
+    });
+    all('.heart-pick').forEach(function (button) { button.setAttribute('aria-pressed', String(button.dataset.school === school)); });
+    all('.heart-card').forEach(function (card) { card.hidden = card.dataset.school !== school; });
+  }
+
+  all('.heart-pick').forEach(function (button) { button.addEventListener('click', function () { showHeart(button.dataset.school); }); });
+  xrayRange.addEventListener('input', function () { touched = true; setCut(Number(xrayRange.value)); });
+
+  // A finger sweeps (a tap opens the picture), a mouse moves the edge just by passing over the machine.
+  xray.addEventListener('pointerdown', function (event) {
+    if (event.button > 0) return;
+    touched = true;
+    sweep = { id: event.pointerId, x: event.clientX, moved: false };
+  });
+  window.addEventListener('pointermove', function (event) {
+    if (sweep && event.pointerId === sweep.id) {
+      if (!sweep.moved && Math.abs(event.clientX - sweep.x) > 6) sweep.moved = true;
+      if (sweep.moved) cutAt(event);
+    } else if (event.pointerType === 'mouse' && !event.buttons && xray.contains(event.target)) {
+      touched = true;
+      cutAt(event);
+    }
+  });
+  function endSweep(event) {
+    if (sweep && event.pointerId === sweep.id) setTimeout(function () { sweep = null; }, 0); // after the click it may cause
+  }
+  window.addEventListener('pointerup', endSweep);
+  window.addEventListener('pointercancel', function (event) { if (sweep && event.pointerId === sweep.id) sweep = null; });
+  xray.addEventListener('click', function (event) {
+    if (sweep && sweep.moved) { event.preventDefault(); event.stopPropagation(); }
+  }, true);
+
+  // The first time the machine comes into view, the edge sweeps once: there is something to move here.
+  if (!reduceMotion && 'IntersectionObserver' in window) {
+    var hinted = new IntersectionObserver(function (entries) {
+      if (!entries.some(function (entry) { return entry.isIntersecting; })) return;
+      hinted.disconnect();
+      var began = null;
+      var path = [[0, 66], [.35, 90], [.75, 40], [1.1, 66]];
+      requestAnimationFrame(function step(now) {
+        if (touched) return;
+        began = began || now;
+        var t = (now - began) / 1000;
+        for (var i = 1; i < path.length; i++) {
+          if (t <= path[i][0]) {
+            var part = (t - path[i - 1][0]) / (path[i][0] - path[i - 1][0]);
+            setCut(path[i - 1][1] + (path[i][1] - path[i - 1][1]) * (.5 - Math.cos(Math.PI * part) / 2));
+            requestAnimationFrame(step);
+            return;
+          }
+        }
+        setCut(66);
+      });
+    }, { threshold: .6 });
+    hinted.observe(xray);
+  }
 
   /* ---------- range ruler (stops 7 / 12 / 18 m) ---------- */
   var DISTANCES = [14, 19, 24, 25, 30, 36];
